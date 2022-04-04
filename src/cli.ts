@@ -52,6 +52,7 @@ export const cli = (argv) => {
       "--retain-lines",
       "have babel try to retain original line numbers which may help preserve whitespace (recommended to be used with --prettier)"
     )
+    .option("--only-rename", "only rename file extensions")
     .option("--write", "write output to disk instead of STDOUT")
     .option("--delete-source", "delete the source file");
 
@@ -75,6 +76,7 @@ export const cli = (argv) => {
       printWidth: parseInt(program.printWidth),
     },
     retainLines: Boolean(program.retainLines),
+    onlyRename: Boolean(program.onlyRename),
   } as Options;
 
   if (options.prettier) {
@@ -103,7 +105,12 @@ export const cli = (argv) => {
     const inCode = fs.readFileSync(inFile, "utf-8");
 
     try {
-      const outCode = convert(inCode, options);
+      let outCode;
+      if (options.onlyRename) {
+        outCode = inCode;
+      } else {
+        outCode = convert(inCode, options);
+      }
 
       if (program.write) {
         const extension = detectJsx(inCode) ? ".tsx" : ".ts";
